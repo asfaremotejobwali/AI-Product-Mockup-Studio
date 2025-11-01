@@ -1,0 +1,7 @@
+{
+  "name": "AI Product Mockup Generator",
+  "description": "Upload your logo to generate product mockups. You can also edit images with text prompts or generate new images from scratch using AI.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

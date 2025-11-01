@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Product Mockup Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .view {
+      display: none;
+    }
+    .view.active {
+      display: block;
+    }
+    /* Simple prose styles for AI-generated text */
+    .prose {
+      line-height: 1.6;
+    }
+    .prose ul {
+      list-style-position: inside;
+      padding-left: 1rem;
+    }
+    .prose li {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'classic-dark': '#1a1a1a',
+            'classic-charcoal': '#2c2c2c',
+            'classic-border': '#444444',
+            'classic-gold': '#d4af37',
+            'classic-gold-light': '#e6c35c',
+            'classic-offwhite': '#e0e0e0',
+            'classic-subtle': '#a0a0a0',
+            'classic-green': '#4caf50',
+            'classic-red': '#d32f2f',
+          }
+        }
+      }
+    }
+  </script>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0"
+  }
+}
+</script>
+</head>
+<body class="bg-classic-dark text-classic-offwhite">
+
+  <div class="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8">
+    <div class="w-full max-w-6xl mx-auto">
+      <header class="text-center mb-8">
+        <h1 class="text-4xl sm:text-5xl font-bold text-classic-gold">
+          AI Product Mockup Studio
+        </h1>
+        <p class="mt-2 text-classic-subtle">
+          Effortlessly create stunning product mockups, edit images, and generate designs with the power of AI.
+        </p>
+      </header>
+
+      <main>
+        <!-- TABS -->
+        <div id="tabs-container" class="flex justify-center space-x-4 sm:space-x-8 border-b border-classic-border">
+            <button data-tab="mockups" class="tab-button w-full flex items-center justify-center space-x-2 px-3 py-3 text-sm font-medium transition-colors duration-200 focus:outline-none border-b-2 border-classic-gold text-classic-gold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span>Mockups</span>
+            </button>
+            <button data-tab="editor" class="tab-button w-full flex items-center justify-center space-x-2 px-3 py-3 text-sm font-medium transition-colors duration-200 focus:outline-none border-b-2 border-transparent text-classic-subtle hover:text-classic-offwhite">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>
+                <span>Image Editor</span>
+            </button>
+            <button data-tab="generator" class="tab-button w-full flex items-center justify-center space-x-2 px-3 py-3 text-sm font-medium transition-colors duration-200 focus:outline-none border-b-2 border-transparent text-classic-subtle hover:text-classic-offwhite">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.293 2.293a1 1 0 010 1.414L10 17l-4 4 1.5-1.5M16 4l-2.293 2.293a1 1 0 000 1.414L18 12l4-4-1.5-1.5"></path></svg>
+                <span>Image Generator</span>
+            </button>
+            <button data-tab="discovery" class="tab-button w-full flex items-center justify-center space-x-2 px-3 py-3 text-sm font-medium transition-colors duration-200 focus:outline-none border-b-2 border-transparent text-classic-subtle hover:text-classic-offwhite">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Local Discovery</span>
+            </button>
+        </div>
+
+        <div id="views-container" class="mt-6">
+          <!-- Mockup View -->
+          <div id="view-mockups" class="view active">
+            <!-- Content will be injected by JS -->
+          </div>
+
+          <!-- Image Editor View -->
+          <div id="view-editor" class="view">
+            <!-- Content will be injected by JS -->
+          </div>
+
+          <!-- Image Generator View -->
+          <div id="view-generator" class="view">
+            <!-- Content will be injected by JS -->
+          </div>
+
+          <!-- Local Discovery View -->
+          <div id="view-discovery" class="view">
+             <!-- Content will be injected by JS -->
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { GoogleGenAI, Modality } from "@google/genai";
+
+    // --- STATE MANAGEMENT ---
+    let state = {
+      activeTab: 'mockups',
+      isLoading: false,
+      // Mockup view state
+      mockup: {
+        logoFile: null,
+        selectedId: 'tshirt',
+        selectedColor: 'White',
+        generatedImageUrl: null,
+        error: null,
+      },
+      // Editor view state
+      editor: {
+        imageFile: null,
+        prompt: '',
+        editedImageUrl: null,
+        error: null,
+      },
+      // Generator view state
+      generator: {
+        prompt: '',
+        aspectRatio: '1:1',
+        generatedImageUrl: null,
+        error: null,
+      },
+      // Discovery view state
+      discovery: {
+        location: null,
+        permissionStatus: 'prompt',
+        result: null,
+        error: null,
+      }
+    };
+    
+    // --- GEMINI API SERVICE ---
+    if (!process.env.API_KEY) {
+      const mainContent = document.querySelector('main');
+      if (mainContent) {
+        mainContent.innerHTML = `
+          <div class="bg-classic-red/20 border border-classic-red text-classic-red p-8 rounded-lg text-center mt-6">
+            <h2 class="text-2xl font-bold mb-4">Configuration Error</h2>
+            <p>The API_KEY is not configured for this application.</p>
+            <p class="mt-2 text-sm">Please ensure the API_KEY environment variable is set correctly to use the AI features.</p>
+          </div>
+        `;
+      }
+      throw new Error("API_KEY environment variable is not set.");
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const getApiErrorMessage = (error, candidate) => {
+        if (error.message.includes("API key not valid")) {
+            return "Authentication Error: The provided API Key is not valid. Please check your configuration.";
+        }
+        const blockReason = candidate?.finishReason;
+        const safetyRatings = candidate?.safetyRatings;
+        if (blockReason === 'SAFETY' || (safetyRatings && safetyRatings.some(r => r.blocked))) {
+            return 'The request was blocked for safety reasons. Please modify your input and try again.';
+        }
+        return error.message || 'An unexpected error occurred while communicating with the AI. Please try again later.';
+    }
+
+    const generateMockup = async (logoFile, productPrompt) => {
+      const prompt = `Generate an ultra-realistic, 4k resolution, commercial product mockup of a ${productPrompt}. The image should be in the style of professional product photography with sharp focus and detailed textures. The lighting should be soft and diffused, creating subtle shadows and avoiding harsh reflections. The product must be centered in the frame. Feature this logo prominently and naturally on the product, ensuring correct perspective, wrapping, and texture as if it were part of the original item. The background should be a clean, minimalist, and neutral studio setting, slightly blurred (bokeh) to make the product stand out.`;
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: { parts: [{ inlineData: { data: logoFile.base64, mimeType: logoFile.mimeType } }, { text: prompt }] },
+        config: { responseModalities: [Modality.IMAGE] },
+      });
+      const candidate = response?.candidates?.[0];
+      if (candidate?.content?.parts) {
+        for (const part of candidate.content.parts) {
+          if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        }
+      }
+      throw new Error(getApiErrorMessage({ message: "No image was generated." }, candidate));
+    };
+    
+    const editImage = async (imageFile, prompt) => {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: { parts: [{ inlineData: { data: imageFile.base64, mimeType: imageFile.mimeType } }, { text: prompt }] },
+        config: { responseModalities: [Modality.IMAGE] },
+      });
+      const candidate = response?.candidates?.[0];
+      if (candidate?.content?.parts) {
+        for (const part of candidate.content.parts) {
+          if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        }
+      }
+      throw new Error(getApiErrorMessage({ message: "The edited image could not be generated." }, candidate));
+    };
+
+    const generateImage = async (prompt, aspectRatio) => {
+        const response = await ai.models.generateImages({
+            model: 'imagen-4.0-generate-001',
+            prompt: prompt,
+            config: { numberOfImages: 1, outputMimeType: 'image/jpeg', aspectRatio: aspectRatio },
+        });
+        const image = response?.generatedImages?.[0]?.image;
+        if (image?.imageBytes) {
+            return `data:image/jpeg;base64,${image.imageBytes}`;
+        }
+        throw new Error(getApiErrorMessage({ message: "No image generated from the prompt." }));
+    };
+
+    const findNearbyPlaces = async (query, latitude, longitude) => {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: query,
+            config: {
+                tools: [{googleMaps: {}}],
+                toolConfig: { retrievalConfig: { latLng: { latitude, longitude } } }
+            },
+        });
+        const candidate = response?.candidates?.[0];
+        if (candidate && response.text) {
+            const chunks = candidate.groundingMetadata?.groundingChunks || [];
+            return { text: response.text, chunks };
+        }
+        throw new Error(getApiErrorMessage({ message: "Could not find nearby places." }, candidate));
+    };
+
+
+    // --- UTILS ---
+    const fileToBase64 = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve((reader.result).split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
+
+    const downloadImage = (url, defaultFilename) => {
+      if (!url) return;
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = defaultFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+
+    // --- UI COMPONENTS & TEMPLATES ---
+    const getSpinnerHTML = (text = 'Generating with AI...') => `
+      <div class="flex flex-col items-center justify-center gap-4">
+        <svg class="animate-spin h-10 w-10 text-classic-gold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-classic-subtle">${text}</p>
+      </div>`;
+
+    const getFileUploadHTML = (id, label, fileName = null) => {
+        if (fileName) {
+            return `
+            <div id="file-upload-${id}" class="file-upload-area relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors duration-300 border-classic-green" data-input-id="${id}-input">
+                <div class="flex flex-col items-center justify-center text-classic-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <p class="font-semibold">${fileName}</p>
+                    <p class="text-sm text-classic-subtle">File selected. Drop another to replace it.</p>
+                </div>
+                <input type="file" id="${id}-input" class="hidden" accept="image/png, image/jpeg">
+            </div>`;
+        }
+        return `
+            <div id="file-upload-${id}" class="file-upload-area relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors duration-300 border-classic-border hover:border-classic-gold-light" data-input-id="${id}-input">
+                <div class="flex flex-col items-center justify-center text-classic-subtle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <p class="font-semibold text-classic-offwhite">${label}</p>
+                    <p class="text-sm">or drag and drop</p>
+                </div>
+                <input type="file" id="${id}-input" class="hidden" accept="image/png, image/jpeg">
+            </div>`;
+    };
+
+    // --- RENDER FUNCTIONS ---
+    const render = () => {
+        // Render active tab content
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${state.activeTab}`).classList.add('active');
+
+        // Update tab buttons styles
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            if (btn.dataset.tab === state.activeTab) {
+                btn.classList.add('border-classic-gold', 'text-classic-gold');
+                btn.classList.remove('border-transparent', 'text-classic-subtle');
+            } else {
+                btn.classList.remove('border-classic-gold', 'text-classic-gold');
+                btn.classList.add('border-transparent', 'text-classic-subtle');
+            }
+        });
+        
+        switch (state.activeTab) {
+            case 'mockups': renderMockupView(); break;
+            case 'editor': renderEditorView(); break;
+            case 'generator': renderGeneratorView(); break;
+            case 'discovery': renderDiscoveryView(); break;
+        }
+    };
+
+    // --- MOCKUP VIEW ---
+    const MOCKUP_OPTIONS = [
+      { id: 'tshirt', name: 'T-Shirt', promptTemplate: 'a plain {color} t-shirt worn by a model', colorOptions: ['White', 'Black', 'Gray', 'Red', 'Blue', 'Green'], defaultColor: 'White' },
+      { id: 'mug', name: 'Mug', promptTemplate: 'a {color} ceramic coffee mug', colorOptions: ['White', 'Black', 'Blue', 'Red'], defaultColor: 'Black' },
+      { id: 'hoodie', name: 'Hoodie', promptTemplate: 'a plain {color} hoodie worn by a model', colorOptions: ['Black', 'Gray', 'White', 'Navy', 'Maroon'], defaultColor: 'Black' },
+      { id: 'tote', name: 'Tote Bag', promptTemplate: 'a {color} canvas tote bag', colorOptions: ['Natural', 'Black', 'White'], defaultColor: 'Natural' },
+      { id: 'cap', name: 'Cap', promptTemplate: 'a {color} baseball cap', colorOptions: ['Black', 'White', 'Red', 'Blue', 'Khaki'], defaultColor: 'Black' },
+      { id: 'phonecase', name: 'Phone Case', promptTemplate: 'a {color} smartphone case for a modern phone', colorOptions: ['Black', 'White', 'Light Blue', 'Rose Gold'], defaultColor: 'Black' },
+      { id: 'laptopsleeve', name: 'Laptop Sleeve', promptTemplate: 'a {color} padded laptop sleeve', colorOptions: ['Gray', 'Black', 'Navy'], defaultColor: 'Gray' },
+      { id: 'waterbottle', name: 'Water Bottle', promptTemplate: 'a {color} stainless steel water bottle', colorOptions: ['Silver', 'Black', 'White', 'Blue'], defaultColor: 'Silver' },
+      { id: 'pillow', name: 'Pillow', promptTemplate: 'a square {color} decorative pillow on a couch', colorOptions: ['White', 'Cream', 'Gray', 'Navy'], defaultColor: 'White' },
+      { id: 'poster', name: 'Poster', promptTemplate: 'a poster in a {color} frame hanging on a wall', colorOptions: ['Black', 'White', 'Wood'], defaultColor: 'Black' },
+      { id: 'sticker', name: 'Sticker', promptTemplate: 'a die-cut sticker on a laptop surface' },
+      { id: 'notebook', name: 'Notebook', promptTemplate: 'a {color} hardcover notebook or journal', colorOptions: ['Black', 'Brown', 'Blue', 'Green'], defaultColor: 'Black' },
+      { id: 'beanie', name: 'Beanie', promptTemplate: 'a {color} knitted beanie hat', colorOptions: ['Black', 'Gray', 'Maroon', 'Orange'], defaultColor: 'Black' },
+      { id: 'apron', name: 'Apron', promptTemplate: 'a {color} kitchen apron', colorOptions: ['White', 'Black', 'Denim'], defaultColor: 'White' },
+      { id: 'mousepad', name: 'Mouse Pad', promptTemplate: 'a {color} rectangular mouse pad on a desk', colorOptions: ['Black', 'Gray'], defaultColor: 'Black' },
+      { id: 'socks', name: 'Socks', promptTemplate: 'a pair of {color} crew socks', colorOptions: ['White', 'Black', 'Gray'], defaultColor: 'White' },
+      { id: 'backpack', name: 'Backpack', promptTemplate: 'a {color} modern backpack', colorOptions: ['Black', 'Gray', 'Navy'], defaultColor: 'Black' },
+    ];
+    const MOCKUP_COLORS = { 
+        White: '#FFFFFF', Black: '#000000', Gray: '#808080', Red: '#FF0000', Blue: '#0000FF', Green: '#008000',
+        Navy: '#000080', Maroon: '#800000', Natural: '#F5F5DC', Khaki: '#C3B091', 'Light Blue': '#ADD8E6',
+        'Rose Gold': '#B76E79', Silver: '#C0C0C0', Cream: '#FFFDD0', Wood: '#855E42', Brown: '#A52A2A',
+        Orange: '#FFA500', Denim: '#1560BD'
+    };
+
+    const renderMockupView = () => {
+      const currentMockup = MOCKUP_OPTIONS.find(m => m.id === state.mockup.selectedId);
+      const s = state.mockup;
+      let resultHTML = '<p class="text-classic-subtle">Your generated mockup will appear here</p>';
+      if (state.isLoading) resultHTML = getSpinnerHTML();
+      else if (s.generatedImageUrl) resultHTML = `<img src="${s.generatedImageUrl}" alt="Generated mockup" class="max-w-full max-h-full object-contain rounded-lg"/>`;
+      
+      const view = document.getElementById('view-mockups');
+      view.innerHTML = `
+        <div class="bg-classic-charcoal border border-classic-border rounded-xl shadow-xl p-8">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="flex flex-col space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-classic-offwhite mb-2">1. Upload Your Logo</h3>
+                <p class="text-sm text-classic-subtle mb-3">For best results, use a PNG with a transparent background.</p>
+                <div id="mockup-file-upload-container">${getFileUploadHTML('mockup-logo', 'Click to upload logo', s.logoFile?.name)}</div>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-classic-offwhite mb-2">2. Choose a Product</h3>
+                <div class="flex flex-wrap gap-3">
+                  ${MOCKUP_OPTIONS.map(m => `<button data-mockup-id="${m.id}" class="mockup-option-btn px-4 py-2 rounded-md text-sm font-medium transition-colors ${s.selectedId === m.id ? 'bg-classic-gold text-classic-dark' : 'bg-classic-charcoal text-classic-subtle hover:bg-classic-border'}">${m.name}</button>`).join('')}
+                </div>
+              </div>
+              ${currentMockup.colorOptions ? `
+              <div>
+                <h3 class="text-lg font-semibold text-classic-offwhite mb-2">3. Choose a Color</h3>
+                <div class="flex flex-wrap gap-3 items-center">
+                  ${currentMockup.colorOptions.map(c => `<button data-color="${c}" style="background-color: ${MOCKUP_COLORS[c]}" title="${c}" class="mockup-color-btn w-8 h-8 rounded-full border-2 transition-all duration-200 focus:outline-none ${s.selectedColor === c ? 'border-classic-gold scale-110' : 'border-classic-border hover:border-classic-subtle'}"></button>`).join('')}
+                  ${s.selectedColor ? `<span class="text-classic-offwhite ml-2 capitalize">${s.selectedColor}</span>` : ''}
+                </div>
+              </div>` : ''}
+              <button id="generate-mockup-btn" class="flex items-center justify-center font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-classic-dark transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-classic-gold hover:bg-classic-gold-light focus:ring-classic-gold text-classic-dark" ${!s.logoFile || state.isLoading ? 'disabled' : ''}>
+                ${state.isLoading ? 'Processing...' : 'Generate Mockup'}
+              </button>
+              ${s.error ? `<p class="text-classic-red text-sm mt-2">${s.error}</p>` : ''}
+            </div>
+            <div class="flex flex-col">
+              <h3 class="text-lg font-semibold text-classic-offwhite mb-2 text-center">Your Mockup</h3>
+              <div class="w-full aspect-square bg-classic-dark/50 rounded-lg flex items-center justify-center border border-classic-border">${resultHTML}</div>
+              ${!state.isLoading && s.generatedImageUrl ? `
+              <div class="mt-4 flex flex-col sm:flex-row gap-4">
+                  <button id="download-mockup-btn" class="w-full flex items-center justify-center font-bold py-2 px-4 rounded-md bg-classic-gold hover:bg-classic-gold-light text-classic-dark">Download</button>
+                  <button id="regenerate-mockup-btn" class="w-full flex items-center justify-center font-bold py-2 px-4 rounded-md bg-transparent border border-classic-gold text-classic-gold hover:bg-classic-gold hover:text-classic-dark">Generate Variation</button>
+              </div>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    // --- EDITOR VIEW ---
+    const renderEditorView = () => {
+      const s = state.editor;
+      let resultHTML = '<p class="text-classic-subtle">Your edited image will appear here</p>';
+      if (state.isLoading) resultHTML = getSpinnerHTML();
+      else if (s.editedImageUrl) resultHTML = `<img src="${s.editedImageUrl}" alt="Edited image" class="max-w-full max-h-full object-contain rounded-lg"/>`;
+      
+      const view = document.getElementById('view-editor');
+      view.innerHTML = `
+        <div class="bg-classic-charcoal border border-classic-border rounded-xl shadow-xl p-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="flex flex-col space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-classic-offwhite mb-2">1. Upload Image</h3>
+                <div id="editor-file-upload-container">${getFileUploadHTML('editor-image', 'Click to upload image', s.imageFile?.name)}</div>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-classic-offwhite mb-2">2. Describe Your Edit</h3>
+                <textarea id="editor-prompt" class="w-full p-3 bg-classic-dark border border-classic-border rounded-md focus:ring-2 focus:ring-classic-gold focus:border-classic-gold focus:outline-none transition" rows="4" placeholder="e.g., 'Add a retro filter'">${s.prompt}</textarea>
+              </div>
+              <button id="apply-edit-btn" class="flex items-center justify-center font-bold py-2 px-4 rounded-md bg-classic-gold text-classic-dark" ${!s.imageFile || !s.prompt || state.isLoading ? 'disabled' : ''}>
+                ${state.isLoading ? 'Processing...' : 'Apply Edit'}
+              </button>
+              ${s.error ? `<p class="text-classic-red text-sm mt-2">${s.error}</p>` : ''}
+            </div>
+            <div class="flex flex-col space-y-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-classic-offwhite mb-2 text-center">Original</h3>
+                    <div class="aspect-square w-full bg-classic-dark/50 rounded-lg flex items-center justify-center border border-classic-border">
+                        ${s.imageFile ? `<img src="data:${s.imageFile.mimeType};base64,${s.imageFile.base64}" class="max-w-full max-h-full object-contain rounded-lg"/>` : `<p class="text-classic-subtle">Upload an image to see it here</p>`}
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-classic-offwhite mb-2 text-center">Edited</h3>
+                    <div class="aspect-square w-full bg-classic-dark/50 rounded-lg flex items-center justify-center border border-classic-border">${resultHTML}</div>
+                     ${!state.isLoading && s.editedImageUrl ? `<div class="mt-4"><button id="download-edit-btn" class="w-full flex items-center justify-center font-bold py-2 px-4 rounded-md bg-classic-gold text-classic-dark">Download Edited Image</button></div>` : ''}
+                </div>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    // --- GENERATOR VIEW ---
+    const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
+    const renderGeneratorView = () => {
+      const s = state.generator;
+      let resultHTML = '<p class="text-classic-subtle">Your generated image will appear here</p>';
+      if (state.isLoading) resultHTML = getSpinnerHTML();
+      else if (s.generatedImageUrl) resultHTML = `<img src="${s.generatedImageUrl}" alt="Generated image" class="max-w-full max-h-full object-contain rounded-lg"/>`;
+      
+      const view = document.getElementById('view-generator');
+      view.innerHTML = `
+        <div class="bg-classic-charcoal border border-classic-border rounded-xl shadow-xl p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="flex flex-col space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-classic-offwhite mb-2">1. Describe Your Image</h3>
+                        <textarea id="generator-prompt" class="w-full p-3 bg-classic-dark border border-classic-border rounded-md" rows="6" placeholder="e.g., 'A photorealistic image of a futuristic storefront'">${s.prompt}</textarea>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-classic-offwhite mb-2">2. Select Aspect Ratio</h3>
+                        <div class="flex flex-wrap gap-2">
+                          ${ASPECT_RATIOS.map(r => `<button data-ratio="${r}" class="aspect-ratio-btn px-4 py-2 rounded-md text-sm font-medium transition-colors ${s.aspectRatio === r ? 'bg-classic-gold text-classic-dark' : 'bg-classic-charcoal text-classic-subtle hover:bg-classic-border'}">${r}</button>`).join('')}
+                        </div>
+                    </div>
+                    <button id="generate-image-btn" class="flex items-center justify-center font-bold py-2 px-4 rounded-md bg-classic-gold text-classic-dark" ${!s.prompt || state.isLoading ? 'disabled' : ''}>
+                        ${state.isLoading ? 'Processing...' : 'Generate Image'}
+                    </button>
+                    ${s.error ? `<p class="text-classic-red text-sm mt-2">${s.error}</p>` : ''}
+                </div>
+                <div class="flex flex-col">
+                    <h3 class="text-lg font-semibold text-classic-offwhite mb-2 text-center">Result</h3>
+                    <div class="w-full aspect-square bg-classic-dark/50 rounded-lg flex items-center justify-center border border-classic-border">${resultHTML}</div>
+                    ${!state.isLoading && s.generatedImageUrl ? `<div class="mt-4"><button id="download-generated-btn" class="w-full flex items-center justify-center font-bold py-2 px-4 rounded-md bg-classic-gold text-classic-dark">Download Image</button></div>` : ''}
+                </div>
+            </div>
+        </div>
+      `;
+    };
+
+    // --- DISCOVERY VIEW ---
+    const renderDiscoveryView = () => {
+        const s = state.discovery;
+        let contentHTML = '';
+
+        if (state.isLoading) {
+            contentHTML = `<div class="flex justify-center">${getSpinnerHTML('Finding places...')}</div>`;
+        } else if (s.error) {
+            contentHTML = `<p class="text-classic-red text-center">${s.error}</p>`;
+        } else if (s.result) {
+            const placesHTML = s.result.chunks
+                .filter(c => c.maps)
+                .map(chunk => `
+                    <li class="bg-classic-dark p-4 rounded-lg border border-classic-border">
+                        <a href="${chunk.maps.uri}" target="_blank" rel="noopener noreferrer" class="text-classic-gold-light hover:underline font-semibold block">${chunk.maps.title}</a>
+                    </li>
+                `).join('');
+
+            contentHTML = `
+                <div class="space-y-6 text-left">
+                    <div class="prose max-w-none text-classic-offwhite">${s.result.text.replace(/\n/g, '<br />')}</div>
+                    ${placesHTML ? `<div><h4 class="text-lg font-semibold text-classic-gold mb-4">Locations on Google Maps:</h4><ul class="space-y-4">${placesHTML}</ul></div>` : ''}
+                </div>`;
+        } else if (s.permissionStatus === 'prompt') {
+            contentHTML = `
+                <div class="flex flex-col items-center space-y-4">
+                    <p class="text-classic-subtle">Allow location access to find print shops near you.</p>
+                    <button id="get-location-btn" class="flex items-center justify-center font-bold py-2 px-4 rounded-md bg-classic-gold text-classic-dark">Share My Location</button>
+                </div>`;
+        } else if (s.permissionStatus === 'denied') {
+             contentHTML = `<p class="text-classic-red">Location access was denied. You can change this in your browser settings to use this feature.</p>`;
+        } else if (s.permissionStatus === 'granted') {
+             contentHTML = `
+                <div class="flex flex-col items-center space-y-4">
+                    <p class="text-classic-green">Location access granted! Ready to find shops.</p>
+                    <button id="find-shops-btn" class="flex items-center justify-center font-bold py-2 px-4 rounded-md bg-classic-gold text-classic-dark">Find Nearby Print Shops</button>
+                </div>`;
+        }
+
+        const view = document.getElementById('view-discovery');
+        view.innerHTML = `
+            <div class="bg-classic-charcoal border border-classic-border rounded-xl shadow-xl p-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-2xl font-bold text-classic-gold mb-4">Find Local Print Shops</h2>
+                    ${contentHTML}
+                </div>
+            </div>
+        `;
+    };
+
+    // --- EVENT HANDLERS ---
+    const handleFileUpload = async (files, type) => {
+        if (!files || files.length === 0) return;
+        const file = files[0];
+        try {
+            const base64 = await fileToBase64(file);
+            const imageFile = { base64, mimeType: file.type, name: file.name };
+            if (type === 'mockup') state.mockup.logoFile = imageFile;
+            else if (type === 'editor') state.editor.imageFile = imageFile;
+            render();
+        } catch (error) {
+            console.error("File processing error:", error);
+            alert("Error processing file.");
+        }
+    };
+    
+    const handleGenerateMockup = async () => {
+        const mockup = MOCKUP_OPTIONS.find(m => m.id === state.mockup.selectedId);
+        if (!state.mockup.logoFile || !mockup) {
+            state.mockup.error = 'Please upload a logo and select a product.';
+            render();
+            return;
+        }
+        state.isLoading = true;
+        state.mockup.error = null;
+        state.mockup.generatedImageUrl = null;
+        render();
+
+        try {
+            let prompt = mockup.promptTemplate;
+            if (mockup.colorOptions && state.mockup.selectedColor) {
+                prompt = prompt.replace('{color}', state.mockup.selectedColor.toLowerCase());
+            }
+            const resultUrl = await generateMockup(state.mockup.logoFile, prompt);
+            state.mockup.generatedImageUrl = resultUrl;
+        } catch (err) {
+            state.mockup.error = err.message;
+        } finally {
+            state.isLoading = false;
+            render();
+        }
+    };
+
+    const handleApplyEdit = async () => {
+        if (!state.editor.imageFile || !state.editor.prompt) {
+            state.editor.error = 'Please upload an image and provide a prompt.';
+            render();
+            return;
+        }
+        state.isLoading = true;
+        state.editor.error = null;
+        state.editor.editedImageUrl = null;
+        render();
+
+        try {
+            const resultUrl = await editImage(state.editor.imageFile, state.editor.prompt);
+            state.editor.editedImageUrl = resultUrl;
+        } catch (err) {
+            state.editor.error = err.message;
+        } finally {
+            state.isLoading = false;
+            render();
+        }
+    };
+
+    const handleGenerateImage = async () => {
+        if (!state.generator.prompt) {
+            state.generator.error = 'Please provide a prompt.';
+            render();
+            return;
+        }
+        state.isLoading = true;
+        state.generator.error = null;
+        state.generator.generatedImageUrl = null;
+        render();
+
+        try {
+            const resultUrl = await generateImage(state.generator.prompt, state.generator.aspectRatio);
+            state.generator.generatedImageUrl = resultUrl;
+        } catch (err) {
+            state.generator.error = err.message;
+        } finally {
+            state.isLoading = false;
+            render();
+        }
+    };
+    
+    const handleGetLocation = () => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                state.discovery.location = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+                state.discovery.permissionStatus = 'granted';
+                state.discovery.error = null;
+                render();
+            },
+            () => {
+                state.discovery.error = "Unable to retrieve your location.";
+                state.discovery.permissionStatus = 'denied';
+                render();
+            }
+        );
+    };
+
+    const handleFindShops = async () => {
+        if (!state.discovery.location) return;
+        state.isLoading = true;
+        state.discovery.error = null;
+        state.discovery.result = null;
+        render();
+
+        try {
+            const result = await findNearbyPlaces("Find local print shops that can print logos on t-shirts and mugs.", state.discovery.location.latitude, state.discovery.location.longitude);
+            state.discovery.result = result;
+        } catch (err) {
+            state.discovery.error = err.message;
+        } finally {
+            state.isLoading = false;
+            render();
+        }
+    };
+
+    // --- EVENT LISTENERS INITIALIZATION ---
+    document.getElementById('tabs-container').addEventListener('click', (e) => {
+      const button = e.target.closest('.tab-button');
+      if (button) {
+        state.activeTab = button.dataset.tab;
+        render();
+      }
+    });
+
+    // Delegated event listeners for dynamic content
+    document.getElementById('views-container').addEventListener('click', (e) => {
+      const target = e.target;
+      
+      // File Uploads
+      const fileUploadArea = target.closest('.file-upload-area');
+      if (fileUploadArea) {
+        document.getElementById(fileUploadArea.dataset.inputId).click();
+        return;
+      }
+      
+      // Mockup View
+      if (state.activeTab === 'mockups') {
+        const mockupBtn = target.closest('.mockup-option-btn');
+        if (mockupBtn) {
+            state.mockup.selectedId = mockupBtn.dataset.mockupId;
+            state.mockup.selectedColor = MOCKUP_OPTIONS.find(m => m.id === state.mockup.selectedId)?.defaultColor || null;
+            render();
+            return;
+        }
+        const colorBtn = target.closest('.mockup-color-btn');
+        if (colorBtn) {
+            state.mockup.selectedColor = colorBtn.dataset.color;
+            render();
+            return;
+        }
+        if (target.id === 'generate-mockup-btn' || target.id === 'regenerate-mockup-btn') handleGenerateMockup();
+        if (target.id === 'download-mockup-btn') downloadImage(state.mockup.generatedImageUrl, `mockup-${state.mockup.logoFile.name}`);
+      }
+      
+      // Editor View
+      if (state.activeTab === 'editor') {
+        if (target.id === 'apply-edit-btn') handleApplyEdit();
+        if (target.id === 'download-edit-btn') downloadImage(state.editor.editedImageUrl, `edited-${state.editor.imageFile.name}`);
+      }
+
+      // Generator View
+      if (state.activeTab === 'generator') {
+        const ratioBtn = target.closest('.aspect-ratio-btn');
+        if (ratioBtn) {
+            state.generator.aspectRatio = ratioBtn.dataset.ratio;
+            render();
+            return;
+        }
+        if (target.id === 'generate-image-btn') handleGenerateImage();
+        if (target.id === 'download-generated-btn') downloadImage(state.generator.generatedImageUrl, 'generated-image.jpeg');
+      }
+
+      // Discovery View
+      if (state.activeTab === 'discovery') {
+        if (target.id === 'get-location-btn') handleGetLocation();
+        if (target.id === 'find-shops-btn') handleFindShops();
+      }
+    });
+
+    document.getElementById('views-container').addEventListener('input', (e) => {
+      const target = e.target;
+      if (state.activeTab === 'editor' && target.id === 'editor-prompt') {
+          state.editor.prompt = target.value;
+          document.getElementById('apply-edit-btn').disabled = !state.editor.imageFile || !state.editor.prompt || state.isLoading;
+      }
+      if (state.activeTab === 'generator' && target.id === 'generator-prompt') {
+          state.generator.prompt = target.value;
+          document.getElementById('generate-image-btn').disabled = !state.generator.prompt || state.isLoading;
+      }
+    });
+
+    // File input and drag/drop listeners
+    document.getElementById('views-container').addEventListener('change', (e) => {
+        const target = e.target;
+        if (target.type === 'file') {
+            const type = target.id.startsWith('mockup') ? 'mockup' : 'editor';
+            handleFileUpload(target.files, type);
+        }
+    });
+
+    document.getElementById('views-container').addEventListener('dragover', e => e.preventDefault());
+    document.getElementById('views-container').addEventListener('drop', e => {
+        e.preventDefault();
+        const fileUploadArea = e.target.closest('.file-upload-area');
+        if (fileUploadArea) {
+            const type = fileUploadArea.id.includes('mockup') ? 'mockup' : 'editor';
+            handleFileUpload(e.dataTransfer.files, type);
+        }
+    });
+
+    // --- INITIAL RENDER ---
+    render();
+
+  </script>
+</body>
+</html>
